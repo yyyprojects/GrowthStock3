@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>An Interactive Guide to Growth Stocks</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: "Warm Neutral" - A calming palette with a light beige background, dark gray text, and subtle slate blue and terracotta accents to feel supportive, professional, and integrated. -->
+    <!-- Application Structure Plan: A thematic, single-page application structure was chosen over a linear report format to enhance user engagement and understanding. The flow is designed to guide a novice user from basic concepts to more complex comparisons and practical examples. Key sections are: 1) 'What Are They?' for foundational knowledge using interactive cards. 2) 'Growth vs. Value' for direct comparison using a dynamic toggle and chart. 3) 'The Investor's Toolkit' to explain identification methods with interactive tabs and visualizations. 4) 'Risks & Rewards' for a balanced perspective using a side-by-side layout. 5) 'Real-World Examples' to make concepts concrete via a clickable gallery with modals. This non-linear, interactive structure allows users to explore topics at their own pace, making the dense information more digestible and accessible than a static document. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: Core characteristics of growth companies -> Goal: Inform/Organize -> Viz/Method: Interactive HTML cards -> Interaction: Click to reveal details -> Justification: Breaks down complex attributes into manageable, self-paced chunks.
+        - Report Info: Comparison of Growth vs. Value stocks -> Goal: Compare -> Viz/Method: Side-by-side layout with toggles and a Chart.js Bar Chart -> Interaction: Toggle between 'Growth' and 'Value' to update text and chart -> Justification: Provides clear, direct visual and textual comparison of opposing investment styles.
+        - Report Info: Financial metrics for identifying stocks -> Goal: Inform/Explain -> Viz/Method: Chart.js Bar Chart within a tabbed interface -> Interaction: User selects a metric (P/E, ROE) to update the chart and see a visual comparison -> Justification: Makes abstract financial ratios tangible and easier to understand for beginners.
+        - Report Info: Company examples (Nvidia, Tractor Supply) -> Goal: Illustrate -> Viz/Method: Clickable gallery opening modals with text and a Chart.js Line Chart -> Interaction: Click logo to see a case study -> Justification: Connects abstract concepts to recognizable brands, reinforcing learning with illustrative growth curves.
+        - All diagrams are built with HTML/CSS to avoid SVG/Mermaid.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .active-nav { color: #3b82f6; border-bottom-color: #3b82f6; }
+        .inactive-nav { border-bottom-color: transparent; }
+        .chart-container { position: relative; width: 100%; max-width: 600px; margin-left: auto; margin-right: auto; height: 350px; max-height: 400px; }
+        .modal { transition: opacity 0.25s ease; }
+        .modal-content { transition: transform 0.25s ease; }
+        .nav-link { transition: color 0.2s, border-color 0.2s; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <header id="header" class="bg-white/80 backdrop-blur-md sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex-shrink-0">
+                    <a href="#" class="text-xl font-bold text-gray-900">Growth Investing 101</a>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#what-are-they" class="nav-link text-gray-600 hover:text-blue-500 px-3 py-2 rounded-md text-sm font-medium border-b-2 inactive-nav">What Are They?</a>
+                        <a href="#growth-vs-value" class="nav-link text-gray-600 hover:text-blue-500 px-3 py-2 rounded-md text-sm font-medium border-b-2 inactive-nav">Growth vs. Value</a>
+                        <a href="#toolkit" class="nav-link text-gray-600 hover:text-blue-500 px-3 py-2 rounded-md text-sm font-medium border-b-2 inactive-nav">Investor's Toolkit</a>
+                        <a href="#risks-rewards" class="nav-link text-gray-600 hover:text-blue-500 px-3 py-2 rounded-md text-sm font-medium border-b-2 inactive-nav">Risks & Rewards</a>
+                        <a href="#examples" class="nav-link text-gray-600 hover:text-blue-500 px-3 py-2 rounded-md text-sm font-medium border-b-2 inactive-nav">Examples</a>
+                    </div>
+                </div>
+                <div class="md:hidden">
+                    <button id="mobile-menu-button" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none">
+                        <span class="sr-only">Open main menu</span>
+                        <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div id="mobile-menu" class="md:hidden hidden">
+                <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                    <a href="#what-are-they" class="block nav-link text-gray-600 hover:text-blue-500 px-3 py-2 rounded-md text-base font-medium">What Are They?</a>
+                    <a href="#growth-vs-value" class="block nav-link text-gray-600 hover:text-blue-500 px-3 py-2 rounded-md text-base font-medium">Growth vs. Value</a>
+                    <a href="#toolkit" class="block nav-link text-gray-600 hover:text-blue-500 px-3 py-2 rounded-md text-base font-medium">Investor's Toolkit</a>
+                    <a href="#risks-rewards" class="block nav-link text-gray-600 hover:text-blue-500 px-3 py-2 rounded-md text-base font-medium">Risks & Rewards</a>
+                    <a href="#examples" class="block nav-link text-gray-600 hover:text-blue-500 px-3 py-2 rounded-md text-base font-medium">Examples</a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+        <section id="hero" class="text-center py-16">
+            <h1 class="text-4xl md:text-6xl font-extrabold text-gray-900 leading-tight">
+                What is a <span class="text-blue-600">Growth Stock?</span>
+            </h1>
+            <p class="mt-4 max-w-3xl mx-auto text-lg md:text-xl text-gray-600">
+                In simple terms, it's a share in a company expected to grow its earnings and revenue much faster than the average company in the market. Investors buy them for capital appreciation—the potential for the stock's price to soar.
+            </p>
+        </section>
+
+        <div class="space-y-24 md:space-y-32">
+
+            <section id="what-are-they">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold text-gray-900">The Anatomy of a Growth Company</h2>
+                    <p class="mt-2 text-lg text-gray-600 max-w-2xl mx-auto">
+                        Growth companies share a unique DNA focused on rapid expansion and innovation. This section breaks down their core characteristics. Click on each card to learn more about the defining traits that set these companies apart.
+                    </p>
+                </div>
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div class="characteristic-card bg-white p-6 rounded-lg shadow-md cursor-pointer hover:shadow-xl transition-shadow">
+                        <h3 class="text-xl font-semibold text-blue-600">🚀 Above-Average Growth</h3>
+                        <p class="mt-2 text-gray-600">Their primary trait is expanding revenues and earnings faster than their industry or the overall market.</p>
+                        <div class="details hidden mt-4 text-sm text-gray-500 border-t pt-4">
+                            This forward-looking projection is the bedrock of a stock's "growth" classification. The market values these companies based on what they are expected to achieve, not just their current performance.
+                        </div>
+                    </div>
+                    <div class="characteristic-card bg-white p-6 rounded-lg shadow-md cursor-pointer hover:shadow-xl transition-shadow">
+                        <h3 class="text-xl font-semibold text-blue-600">💰 Reinvesting Profits</h3>
+                        <p class="mt-2 text-gray-600">They rarely pay dividends, instead funneling profits back into the business for R&D, expansion, and technology.</p>
+                        <div class="details hidden mt-4 text-sm text-gray-500 border-t pt-4">
+                            This reinvestment is the engine of their accelerated growth. While investors forgo immediate income, the goal is to compound the company's value, leading to a much higher stock price in the future.
+                        </div>
+                    </div>
+                    <div class="characteristic-card bg-white p-6 rounded-lg shadow-md cursor-pointer hover:shadow-xl transition-shadow">
+                        <h3 class="text-xl font-semibold text-blue-600">📈 High Valuations</h3>
+                        <p class="mt-2 text-gray-600">Often trade at high Price-to-Earnings (P/E) ratios, seeming "expensive" based on current earnings.</p>
+                        <div class="details hidden mt-4 text-sm text-gray-500 border-t pt-4">
+                            Investors are willing to pay a premium for the promise of significant future earnings. This high valuation is a reflection of market optimism about the company's long-term potential.
+                        </div>
+                    </div>
+                    <div class="characteristic-card bg-white p-6 rounded-lg shadow-md cursor-pointer hover:shadow-xl transition-shadow">
+                        <h3 class="text-xl font-semibold text-blue-600">🏰 Competitive Advantage</h3>
+                        <p class="mt-2 text-gray-600">Often possess an economic "moat" like proprietary technology, strong branding, or network effects.</p>
+                        <div class="details hidden mt-4 text-sm text-gray-500 border-t pt-4">
+                            This durable advantage is crucial for fending off competitors and sustaining high growth over the long term. Without it, initial success could be quickly eroded by rivals.
+                        </div>
+                    </div>
+                    <div class="characteristic-card bg-white p-6 rounded-lg shadow-md cursor-pointer hover:shadow-xl transition-shadow">
+                        <h3 class="text-xl font-semibold text-blue-600">💡 Innovative Industries</h3>
+                        <p class="mt-2 text-gray-600">Common in dynamic sectors like tech, biotech, AI, and e-commerce where disruption is rampant.</p>
+                        <div class="details hidden mt-4 text-sm text-gray-500 border-t pt-4">
+                            These industries provide fertile ground for companies to create new markets or capture significant share in existing ones, offering a long runway for expansion.
+                        </div>
+                    </div>
+                    <div class="characteristic-card bg-white p-6 rounded-lg shadow-md cursor-pointer hover:shadow-xl transition-shadow">
+                        <h3 class="text-xl font-semibold text-blue-600">🎢 Higher Volatility</h3>
+                        <p class="mt-2 text-gray-600">Their stock prices can be more sensitive to market shifts and news, leading to bigger swings.</p>
+                        <div class="details hidden mt-4 text-sm text-gray-500 border-t pt-4">
+                            Because their value is tied to future expectations, any change in sentiment or a failure to meet growth targets can lead to sharp and rapid price declines. This is an inherent part of their risk/reward profile.
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="growth-vs-value">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold text-gray-900">The Great Debate: Growth vs. Value</h2>
+                    <p class="mt-2 text-lg text-gray-600 max-w-2xl mx-auto">
+                        Investing is often seen through two primary lenses: growth and value. While both aim for returns, their philosophies and methods differ significantly. This section provides a direct comparison to help you understand their unique approaches.
+                    </p>
+                </div>
+                <div class="flex justify-center mb-8">
+                    <div class="relative inline-block w-64">
+                        <div class="flex items-center bg-gray-200 rounded-full p-1">
+                            <button id="growth-btn" class="comparison-btn w-1/2 bg-white text-blue-600 rounded-full p-2 text-sm font-semibold shadow">Growth</button>
+                            <button id="value-btn" class="comparison-btn w-1/2 text-gray-600 rounded-full p-2 text-sm font-semibold">Value</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="grid lg:grid-cols-2 gap-8 items-center">
+                    <div id="comparison-text-content" class="bg-white p-6 rounded-lg shadow-md">
+                        <h3 id="comparison-title" class="text-2xl font-bold text-blue-600 mb-4">Focus on Future Potential</h3>
+                        <p id="comparison-desc" class="text-gray-700">Growth investors are primarily focused on capital appreciation. They seek companies poised for rapid expansion, believing their future earnings will far exceed their current state. The value is in what the company *will become*.</p>
+                        <ul id="comparison-list" class="mt-4 space-y-2 text-gray-600">
+                            <li><strong>Goal:</strong> Soaring stock price</li>
+                            <li><strong>Dividends:</strong> Rarely paid</li>
+                            <li><strong>Risk:</strong> Higher volatility</li>
+                            <li><strong>Industries:</strong> Tech, Biotech, AI</li>
+                        </ul>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="comparisonChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <section id="toolkit">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold text-gray-900">The Investor's Toolkit</h2>
+                    <p class="mt-2 text-lg text-gray-600 max-w-2xl mx-auto">
+                        Identifying promising growth stocks requires a blend of quantitative analysis and qualitative judgment. This toolkit explores both the numbers and the narratives that can signal strong future potential.
+                    </p>
+                </div>
+                <div>
+                    <div class="border-b border-gray-200 mb-8">
+                        <nav class="-mb-px flex space-x-8 justify-center" aria-label="Tabs">
+                            <button id="tab-numbers" class="toolkit-tab whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm text-blue-600 border-blue-600">
+                                By the Numbers
+                            </button>
+                            <button id="tab-qualitative" class="toolkit-tab whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm text-gray-500 border-transparent hover:text-gray-700 hover:border-gray-300">
+                                Beyond the Numbers
+                            </button>
+                        </nav>
+                    </div>
+                    <div id="content-numbers" class="toolkit-content">
+                        <p class="text-center text-gray-600 mb-6">Investors use key financial metrics to gauge a company's growth and valuation. Select a metric below to see how a typical growth stock compares to a value stock, providing context for what "high" or "low" might mean.</p>
+                        <div class="flex justify-center mb-8">
+                            <select id="metric-selector" class="block w-full max-w-xs mx-auto pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md shadow-sm">
+                                <option value="p/e">Price-to-Earnings (P/E) Ratio</option>
+                                <option value="roe">Return on Equity (ROE)</option>
+                            </select>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="metricsChart"></canvas>
+                        </div>
+                    </div>
+                    <div id="content-qualitative" class="toolkit-content hidden">
+                        <p class="text-center text-gray-600 mb-8">Numbers don't tell the whole story. The long-term success of a growth company often depends on less tangible factors. Below is a diagram showing the key qualitative strengths that investors look for.</p>
+                        <div class="max-w-4xl mx-auto space-y-4">
+                            <div class="bg-white p-6 rounded-lg shadow-md text-center">
+                                <h4 class="font-bold text-xl text-blue-600">Core Engine: Visionary Leadership</h4>
+                                <p class="text-sm text-gray-500">A strong management team that can navigate growth and inspire innovation.</p>
+                            </div>
+                            <div class="flex justify-center">
+                               <div class="text-2xl text-gray-400">↓</div>
+                            </div>
+                            <div class="grid md:grid-cols-2 gap-4 text-center">
+                                <div class="bg-white p-4 rounded-lg shadow-sm">
+                                    <h5 class="font-semibold text-gray-700">Market Disruption</h5>
+                                    <p class="text-sm text-gray-500">Creating new markets or upending old ones.</p>
+                                </div>
+                                <div class="bg-white p-4 rounded-lg shadow-sm">
+                                    <h5 class="font-semibold text-gray-700">Large Target Market</h5>
+                                    <p class="text-sm text-gray-500">A big "pond" to grow in.</p>
+                                </div>
+                            </div>
+                            <div class="flex justify-center">
+                               <div class="text-2xl text-gray-400">↓</div>
+                            </div>
+                             <div class="bg-white p-6 rounded-lg shadow-md text-center">
+                                <h4 class="font-bold text-xl text-blue-600">Protective Moat</h4>
+                                <p class="text-sm text-gray-500">Sustainable advantages that protect against competition.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="risks-rewards">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold text-gray-900">A Balancing Act: Risks & Rewards</h2>
+                    <p class="mt-2 text-lg text-gray-600 max-w-2xl mx-auto">
+                        The pursuit of high growth is a double-edged sword. The same factors that create potential for massive gains also introduce significant risks. Understanding this trade-off is essential for any investor.
+                    </p>
+                </div>
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="bg-white p-8 rounded-lg shadow-md border-t-4 border-green-500">
+                        <h3 class="text-2xl font-bold text-green-600">Potential Benefits</h3>
+                        <ul class="mt-6 space-y-4">
+                            <li class="flex items-start">
+                                <span class="flex-shrink-0 h-6 w-6 text-green-500">✔</span>
+                                <div class="ml-3">
+                                    <h4 class="font-semibold">Significant Capital Appreciation</h4>
+                                    <p class="text-gray-600">The primary draw: the potential for a stock's price to increase dramatically over time.</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="flex-shrink-0 h-6 w-6 text-green-500">✔</span>
+                                <div class="ml-3">
+                                    <h4 class="font-semibold">Investing in Innovation</h4>
+                                    <p class="text-gray-600">Participation in the growth of companies shaping the future with new technologies and ideas.</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="flex-shrink-0 h-6 w-6 text-green-500">✔</span>
+                                <div class="ml-3">
+                                    <h4 class="font-semibold">Compounding Growth</h4>
+                                    <p class="text-gray-600">Reinvested profits can fuel exponential growth, supercharging long-term returns.</p>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="bg-white p-8 rounded-lg shadow-md border-t-4 border-red-500">
+                        <h3 class="text-2xl font-bold text-red-600">Inherent Risks</h3>
+                         <ul class="mt-6 space-y-4">
+                            <li class="flex items-start">
+                                <span class="flex-shrink-0 h-6 w-6 text-red-500">✖</span>
+                                <div class="ml-3">
+                                    <h4 class="font-semibold">Higher Volatility</h4>
+                                    <p class="text-gray-600">Prices can swing dramatically based on market sentiment or missed growth targets.</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="flex-shrink-0 h-6 w-6 text-red-500">✖</span>
+                                <div class="ml-3">
+                                    <h4 class="font-semibold">Risk of Overvaluation</h4>
+                                    <p class="text-gray-600">Paying a premium for growth that doesn't materialize can lead to significant losses.</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="flex-shrink-0 h-6 w-6 text-red-500">✖</span>
+                                <div class="ml-3">
+                                    <h4 class="font-semibold">Lack of Income</h4>
+                                    <p class="text-gray-600">No dividends means returns depend entirely on stock price appreciation, which is not guaranteed.</p>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section id="examples">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold text-gray-900">Growth Stocks in the Wild</h2>
+                    <p class="mt-2 text-lg text-gray-600 max-w-2xl mx-auto">
+                        Theory is one thing, but real-world examples make these concepts tangible. Growth can come from many places—technological breakthroughs, serving niche markets, or simply operational excellence. Click on a company to see its growth story.
+                    </p>
+                </div>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
+                    <div class="example-card bg-white p-4 text-center rounded-lg shadow-md cursor-pointer hover:shadow-xl transition-shadow" data-company="nvidia">
+                        <h4 class="font-bold text-lg">NVIDIA</h4>
+                        <p class="text-sm text-gray-500">AI Revolution</p>
+                    </div>
+                    <div class="example-card bg-white p-4 text-center rounded-lg shadow-md cursor-pointer hover:shadow-xl transition-shadow" data-company="tesla">
+                        <h4 class="font-bold text-lg">TESLA</h4>
+                        <p class="text-sm text-gray-500">EV Disruption</p>
+                    </div>
+                    <div class="example-card bg-white p-4 text-center rounded-lg shadow-md cursor-pointer hover:shadow-xl transition-shadow" data-company="monster">
+                        <h4 class="font-bold text-lg">Monster Beverage</h4>
+                        <p class="text-sm text-gray-500">Consumer Trend</p>
+                    </div>
+                    <div class="example-card bg-white p-4 text-center rounded-lg shadow-md cursor-pointer hover:shadow-xl transition-shadow" data-company="tractor">
+                        <h4 class="font-bold text-lg">Tractor Supply Co.</h4>
+                        <p class="text-sm text-gray-500">Niche Market</p>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <footer class="bg-gray-800 text-white mt-16">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 text-center">
+            <h3 class="text-xl font-bold">Strategic Considerations</h3>
+            <p class="mt-2 max-w-3xl mx-auto text-gray-300">
+                Investing in growth stocks requires a long-term perspective and a tolerance for risk. Diversification is key. This guide is for educational purposes only and not financial advice. Always consider consulting with a qualified financial advisor.
+            </p>
+        </div>
+    </footer>
+
+    <div id="modal" class="modal fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 opacity-0 pointer-events-none">
+        <div id="modal-content" class="modal-content bg-white rounded-lg shadow-xl w-11/12 max-w-2xl p-6 md:p-8 transform scale-95">
+            <div class="flex justify-between items-start">
+                <div>
+                    <h3 id="modal-title" class="text-2xl font-bold text-gray-900"></h3>
+                    <p id="modal-subtitle" class="text-sm text-blue-600 font-semibold"></p>
+                </div>
+                <button id="modal-close" class="text-gray-400 hover:text-gray-600">&times;</button>
+            </div>
+            <p id="modal-body" class="mt-4 text-gray-600"></p>
+            <div class="mt-6">
+                <div class="chart-container h-64">
+                    <canvas id="exampleChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    const appData = {
+        comparison: {
+            growth: {
+                title: "Focus on Future Potential",
+                description: "Growth investors are primarily focused on capital appreciation. They seek companies poised for rapid expansion, believing their future earnings will far exceed their current state. The value is in what the company *will become*.",
+                list: [
+                    "<strong>Goal:</strong> Soaring stock price",
+                    "<strong>Dividends:</strong> Rarely paid",
+                    "<strong>Risk:</strong> Higher volatility",
+                    "<strong>Industries:</strong> Tech, Biotech, AI"
+                ],
+                chartData: [45, 10]
+            },
+            value: {
+                title: "Focus on Present Value",
+                description: "Value investors are like bargain hunters. They seek established companies that the market appears to have undervalued. They believe the stock's current price doesn't reflect its intrinsic worth.",
+                list: [
+                    "<strong>Goal:</strong> Price correcting to true value",
+                    "<strong>Dividends:</strong> Often paid",
+                    "<strong>Risk:</strong> Lower volatility",
+                    "<strong>Industries:</strong> Financials, Utilities, Staples"
+                ],
+                chartData: [15, 3]
+            }
+        },
+        metrics: {
+            'p/e': {
+                labels: ['Typical Value Stock', 'Typical Growth Stock'],
+                data: [15, 45],
+                title: 'Illustrative Price-to-Earnings (P/E) Ratio'
+            },
+            'roe': {
+                labels: ['Average Company', 'Strong Growth Company'],
+                data: [10, 20],
+                title: 'Illustrative Return on Equity (ROE) %'
+            }
+        },
+        examples: {
+            nvidia: {
+                title: "NVIDIA",
+                subtitle: "The AI Revolution",
+                body: "NVIDIA's growth has been supercharged by the global demand for its powerful chips, which are the backbone of the AI revolution. By providing the essential hardware for machine learning and data centers, the company established a dominant market position in a rapidly expanding, high-tech industry.",
+                chartData: [10, 25, 30, 60, 150, 250, 400]
+            },
+            tesla: {
+                title: "TESLA",
+                subtitle: "Electric Vehicle Disruption",
+                body: "Tesla didn't just build electric cars; it created an entire ecosystem and brand that disrupted the century-old automotive industry. Its growth story is one of innovation, creating a new market, and achieving massive scale against established giants.",
+                chartData: [5, 10, 40, 30, 90, 180, 250]
+            },
+            monster: {
+                title: "Monster Beverage",
+                subtitle: "Capitalizing on a Consumer Trend",
+                body: "Monster's incredible growth wasn't from a tech breakthrough, but from perfectly identifying and dominating the burgeoning energy drink market. It shows that immense growth can come from understanding and leading a powerful consumer trend.",
+                chartData: [2, 5, 15, 40, 80, 110, 150]
+            },
+            tractor: {
+                title: "Tractor Supply Co.",
+                subtitle: "Serving a Niche Market",
+                body: "Tractor Supply found its growth engine by focusing on a specific, underserved market: hobby farmers and rural lifestyle enthusiasts. By catering specifically to their needs, it carved out a loyal customer base and expanded steadily, even amidst broader retail challenges.",
+                chartData: [10, 15, 25, 45, 70, 95, 130]
+            }
+        }
+    };
+
+    const navLinks = document.querySelectorAll('.nav-link');
+    const sections = document.querySelectorAll('main section[id]');
+
+    function updateActiveNav() {
+        let index = sections.length;
+        while (--index && window.scrollY + 50 < sections[index].offsetTop) {}
+        
+        navLinks.forEach((link) => link.classList.remove('active-nav'));
+        const activeLink = document.querySelector(`.nav-link[href="#${sections[index].id}"]`);
+        if(activeLink) {
+            activeLink.classList.add('active-nav');
+        }
+    }
+    window.addEventListener('scroll', updateActiveNav);
+    updateActiveNav();
+    
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
+    const mobileMenu = document.getElementById('mobile-menu');
+    mobileMenuButton.addEventListener('click', () => {
+        mobileMenu.classList.toggle('hidden');
+    });
+
+    const characteristicCards = document.querySelectorAll('.characteristic-card');
+    characteristicCards.forEach(card => {
+        card.addEventListener('click', () => {
+            const details = card.querySelector('.details');
+            details.classList.toggle('hidden');
+        });
+    });
+
+    const growthBtn = document.getElementById('growth-btn');
+    const valueBtn = document.getElementById('value-btn');
+    const comparisonTitle = document.getElementById('comparison-title');
+    const comparisonDesc = document.getElementById('comparison-desc');
+    const comparisonList = document.getElementById('comparison-list');
+
+    let comparisonChart;
+    const comparisonCtx = document.getElementById('comparisonChart').getContext('2d');
+    function renderComparisonChart(data) {
+        if (comparisonChart) {
+            comparisonChart.destroy();
+        }
+        comparisonChart = new Chart(comparisonCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Illustrative P/E Ratio', 'Illustrative Dividend Yield %'],
+                datasets: [{
+                    label: 'Metric Value',
+                    data: data,
+                    backgroundColor: ['rgba(59, 130, 246, 0.5)', 'rgba(239, 68, 68, 0.5)'],
+                    borderColor: ['rgba(59, 130, 246, 1)', 'rgba(239, 68, 68, 1)'],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    title: { display: true, text: 'Illustrative Comparison' },
+                    tooltip: {
+                         callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed.y !== null) {
+                                    label += context.parsed.y;
+                                    if(context.label.includes('Yield')) label += '%';
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                },
+                scales: { y: { beginAtZero: true } }
+            }
+        });
+    }
+
+    function updateComparisonContent(type) {
+        const data = appData.comparison[type];
+        comparisonTitle.textContent = data.title;
+        comparisonDesc.textContent = data.description;
+        comparisonList.innerHTML = data.list.map(item => `<li>${item}</li>`).join('');
+        renderComparisonChart(data.chartData);
+
+        if (type === 'growth') {
+            growthBtn.classList.add('bg-white', 'text-blue-600', 'shadow');
+            growthBtn.classList.remove('text-gray-600');
+            valueBtn.classList.remove('bg-white', 'text-blue-600', 'shadow');
+            valueBtn.classList.add('text-gray-600');
+        } else {
+            valueBtn.classList.add('bg-white', 'text-blue-600', 'shadow');
+            valueBtn.classList.remove('text-gray-600');
+            growthBtn.classList.remove('bg-white', 'text-blue-600', 'shadow');
+            growthBtn.classList.add('text-gray-600');
+        }
+    }
+
+    growthBtn.addEventListener('click', () => updateComparisonContent('growth'));
+    valueBtn.addEventListener('click', () => updateComparisonContent('value'));
+    updateComparisonContent('growth');
+
+    const tabNumbers = document.getElementById('tab-numbers');
+    const tabQualitative = document.getElementById('tab-qualitative');
+    const contentNumbers = document.getElementById('content-numbers');
+    const contentQualitative = document.getElementById('content-qualitative');
+
+    function switchTab(tab) {
+        if (tab === 'numbers') {
+            tabNumbers.classList.add('text-blue-600', 'border-blue-600');
+            tabNumbers.classList.remove('text-gray-500', 'border-transparent', 'hover:text-gray-700', 'hover:border-gray-300');
+            tabQualitative.classList.add('text-gray-500', 'border-transparent', 'hover:text-gray-700', 'hover:border-gray-300');
+            tabQualitative.classList.remove('text-blue-600', 'border-blue-600');
+            contentNumbers.classList.remove('hidden');
+            contentQualitative.classList.add('hidden');
+        } else {
+            tabQualitative.classList.add('text-blue-600', 'border-blue-600');
+            tabQualitative.classList.remove('text-gray-500', 'border-transparent', 'hover:text-gray-700', 'hover:border-gray-300');
+            tabNumbers.classList.add('text-gray-500', 'border-transparent', 'hover:text-gray-700', 'hover:border-gray-300');
+            tabNumbers.classList.remove('text-blue-600', 'border-blue-600');
+            contentQualitative.classList.remove('hidden');
+            contentNumbers.classList.add('hidden');
+        }
+    }
+    tabNumbers.addEventListener('click', () => switchTab('numbers'));
+    tabQualitative.addEventListener('click', () => switchTab('qualitative'));
+
+    const metricSelector = document.getElementById('metric-selector');
+    let metricsChart;
+    const metricsCtx = document.getElementById('metricsChart').getContext('2d');
+    function updateMetricsChart() {
+        const selectedMetric = metricSelector.value;
+        const metricData = appData.metrics[selectedMetric];
+        if (metricsChart) {
+            metricsChart.destroy();
+        }
+        metricsChart = new Chart(metricsCtx, {
+            type: 'bar',
+            data: {
+                labels: metricData.labels,
+                datasets: [{
+                    data: metricData.data,
+                    backgroundColor: ['rgba(239, 68, 68, 0.5)', 'rgba(59, 130, 246, 0.5)'],
+                    borderColor: ['rgba(239, 68, 68, 1)', 'rgba(59, 130, 246, 1)'],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    title: { display: true, text: metricData.title }
+                },
+                scales: { y: { beginAtZero: true } }
+            }
+        });
+    }
+    metricSelector.addEventListener('change', updateMetricsChart);
+    updateMetricsChart();
+
+
+    const modal = document.getElementById('modal');
+    const modalContent = document.getElementById('modal-content');
+    const modalClose = document.getElementById('modal-close');
+    const modalTitle = document.getElementById('modal-title');
+    const modalSubtitle = document.getElementById('modal-subtitle');
+    const modalBody = document.getElementById('modal-body');
+    const exampleCards = document.querySelectorAll('.example-card');
+    let exampleChart;
+    const exampleCtx = document.getElementById('exampleChart').getContext('2d');
+
+    exampleCards.forEach(card => {
+        card.addEventListener('click', () => {
+            const companyKey = card.dataset.company;
+            const companyData = appData.examples[companyKey];
+
+            modalTitle.textContent = companyData.title;
+            modalSubtitle.textContent = companyData.subtitle;
+            modalBody.textContent = companyData.body;
+
+            if (exampleChart) {
+                exampleChart.destroy();
+            }
+            exampleChart = new Chart(exampleCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Start', 'Year 2', 'Year 4', 'Year 6', 'Year 8', 'Year 10', 'Now'],
+                    datasets: [{
+                        label: 'Illustrative Stock Growth',
+                        data: companyData.chartData,
+                        fill: true,
+                        borderColor: 'rgb(59, 130, 246)',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            modalContent.classList.remove('scale-95');
+        });
+    });
+
+    function closeModal() {
+        modal.classList.add('opacity-0');
+        modalContent.classList.add('scale-95');
+        setTimeout(() => modal.classList.add('pointer-events-none'), 250);
+    }
+
+    modalClose.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            closeModal();
+        }
+    });
+});
+</script>
+
+</body>
+</html>
